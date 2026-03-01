@@ -14,6 +14,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.30.3",
   "devDependencies": {
+    "@better-auth/cli": "1.4.18",
     "@eslint/js": "^10.0.1",
     "@types/node": "24",
     "eslint": "9.39.2",
@@ -27,10 +28,13 @@
     "typescript-eslint": "^8.56.1"
   },
   "dependencies": {
+    "@fastify/cors": "11.2.0",
     "@fastify/swagger": "9.7.0",
     "@fastify/swagger-ui": "5.2.5",
     "@prisma/adapter-pg": "7.4.0",
     "@prisma/client": "7.4.0",
+    "better-auth": "1.4.18",
+    "cors@11.2.0": "link:fastify/cors@11.2.0",
     "dotenv": "17.3.1",
     "fastify": "5.7.4",
     "fastify-type-provider-zod": "6.1.0",
