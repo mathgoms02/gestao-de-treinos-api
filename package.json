@@ -35,6 +35,7 @@
     "@scalar/fastify-api-reference": "1.44.20",
     "better-auth": "1.4.18",
     "cors@11.2.0": "link:fastify/cors@11.2.0",
+    "dayjs": "^1.11.19",
     "dotenv": "17.3.1",
     "fastify": "5.7.4",
     "fastify-type-provider-zod": "6.1.0",
