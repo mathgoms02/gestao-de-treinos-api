@@ -3,7 +3,6 @@ import "dotenv/config";
 import fastifyCors from "@fastify/cors";
 import fastifySwagger from "@fastify/swagger";
 import fastifyApiReference from "@scalar/fastify-api-reference";
-import { fromNodeHeaders } from "better-auth/node";
 import Fastify from "fastify";
 import {
   jsonSchemaTransform,
@@ -13,10 +12,8 @@ import {
 } from "fastify-type-provider-zod";
 import z from "zod";
 
-import { NotFoundError } from "./errors/index.js";
-import { WeekDay } from "./generated/prisma/enums.js";
 import { auth } from "./lib/auth.js";
-import { CreateWorkoutPlan } from "./usercases/CreateWorkoutPlan.js";
+import { workoutPlanRoutes } from "./routes/workout-plan.js";
 
 // Import the framework and instantiate it
 const app = Fastify({
@@ -67,95 +64,6 @@ await app.register(fastifyApiReference, {
 });
 
 app.withTypeProvider<ZodTypeProvider>().route({
-  method: "POST",
-  url: "/workout-plans",
-  schema: {
-    body: z.object({
-      name: z.string().trim().min(1),
-      workoutDays: z.array(
-        z.object({
-          name: z.string().trim().min(1),
-          weekDay: z.enum(WeekDay),
-          isRest: z.boolean().default(false),
-          estimatedDurationInSeconds: z.number().min(1),
-          exercises: z.array(
-            z.object({
-              order: z.number().min(0), // Colocando como 0 sendo o primeiro treino do exercicio
-              name: z.string().trim().min(1),
-              sets: z.number().min(1),
-              reps: z.number().min(1),
-              restTimeInSeconds: z.number().min(1),
-            }),
-          ),
-        }),
-      ),
-    }),
-    response: {
-      201: z.object({
-        id: z.uuid(), // criando backend pensando na melhor forma de servir o frontend
-        name: z.string().trim().min(1),
-        workoutDays: z.array(
-          z.object({
-            name: z.string().trim().min(1),
-            weekDay: z.enum(WeekDay),
-            isRest: z.boolean().default(false),
-            estimatedDurationInSeconds: z.number().min(1),
-            exercises: z.array(
-              z.object({
-                order: z.number().min(0), // Colocando como 0 sendo o primeiro treino do exercicio
-                name: z.string().trim().min(1),
-                sets: z.number().min(1),
-                reps: z.number().min(1),
-                restTimeInSeconds: z.number().min(1),
-              }),
-            ),
-          }),
-        ),
-      }),
-      400: z.object({
-        // retornando erro
-        error: z.string(),
-        code: z.string(), // Codes como INVALID_WEEKDAY
-      }),
-      404: z.object({
-        error: z.string(),
-        code: z.string(),
-      }),
-      500: z.object({
-        error: z.string(),
-        code: z.string(),
-      }),
-    },
-  },
-  handler: async (request, reply) => {
-    try {
-      const session = await auth.api.getSession({
-        headers: fromNodeHeaders(request.headers), // Pega aquele Cookie e a sessão daquele cookie
-      });
-      if (!session) {
-        return reply.status(400).send({
-          error: "Unauthorized",
-          code: "UNAUTHORIZED",
-        });
-      }
-      const createWorkoutPlan = new CreateWorkoutPlan();
-      const result = await createWorkoutPlan.execute({
-        userId: session.user.id, // nâo receve userId no body da nossa requisição, sempre pegue a sessão atual do usuário
-        name: request.body.name,
-        workoutDays: request.body.workoutDays,
-      });
-      return reply.status(201).send(result);
-    } catch (error) {
-      app.log.error(error);
-      return reply.status(500).send({
-        error: "Internal server error",
-        code: "INTERNAL_SERVER_ERROR",
-      });
-    }
-  },
-});
-
-app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
   url: "/swagger.json",
   schema: {
@@ -165,6 +73,9 @@ app.withTypeProvider<ZodTypeProvider>().route({
     return app.swagger();
   },
 });
+
+// ROUTES
+await app.register(workoutPlanRoutes, { prefix: "/workout-plans" });
 
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
@@ -210,12 +121,6 @@ app.route({
       reply.send(response.body ? await response.text() : null);
     } catch (error) {
       app.log.error(error);
-      if (error instanceof NotFoundError) {
-        return reply.status(404).send({
-          error: error.message,
-          code: "NOT_FOUND_ERROR",
-        });
-      }
       reply.status(500).send({
         error: "Internal authentication error",
         code: "AUTH_FAILURE",
