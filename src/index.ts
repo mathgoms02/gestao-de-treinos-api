@@ -15,7 +15,6 @@ import z from "zod";
 import { auth } from "./lib/auth.js";
 import { workoutPlanRoutes } from "./routes/workout-plan.js";
 
-// Import the framework and instantiate it
 const app = Fastify({
   logger: true,
 });
@@ -50,7 +49,7 @@ await app.register(fastifyApiReference, {
   configuration: {
     sources: [
       {
-        title: "Bootcamp Treino API",
+        title: "Bootcamp Treinos API",
         slug: "bootcamp-treinos-api",
         url: "/swagger.json",
       },
@@ -63,6 +62,10 @@ await app.register(fastifyApiReference, {
   },
 });
 
+// RESTful
+// Routes
+await app.register(workoutPlanRoutes, { prefix: "/workout-plans" });
+
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
   url: "/swagger.json",
@@ -74,15 +77,12 @@ app.withTypeProvider<ZodTypeProvider>().route({
   },
 });
 
-// ROUTES
-await app.register(workoutPlanRoutes, { prefix: "/workout-plans" });
-
 app.withTypeProvider<ZodTypeProvider>().route({
   method: "GET",
   url: "/",
   schema: {
-    description: "Hello world!",
-    tags: ["Hello World"], // Muda a tag na página da API na parte do GET (que é o que mencionamos)
+    description: "Hello world",
+    tags: ["Hello World"],
     response: {
       200: z.object({
         message: z.string(),
@@ -90,7 +90,9 @@ app.withTypeProvider<ZodTypeProvider>().route({
     },
   },
   handler: () => {
-    return { message: "Hello world!" };
+    return {
+      message: "Hello World",
+    };
   },
 });
 
@@ -129,7 +131,6 @@ app.route({
   },
 });
 
-// Run the server!
 try {
   await app.listen({ port: Number(process.env.PORT) || 8081 });
 } catch (err) {
