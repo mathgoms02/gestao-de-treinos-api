@@ -28,11 +28,13 @@
     "typescript-eslint": "^8.56.1"
   },
   "dependencies": {
+    "@ai-sdk/openai": "3.0.33",
     "@fastify/cors": "11.2.0",
     "@fastify/swagger": "9.7.0",
     "@prisma/adapter-pg": "7.4.0",
     "@prisma/client": "7.4.0",
     "@scalar/fastify-api-reference": "1.44.20",
+    "ai": "6.0.100",
     "better-auth": "1.4.18",
     "cors@11.2.0": "link:fastify/cors@11.2.0",
     "dayjs": "^1.11.19",
