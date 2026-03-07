@@ -4,4 +4,4 @@ node_modules
 .env.example
 
 # Build
-# ./dist
+./dist
