@@ -102,7 +102,8 @@ export class GetStats {
     const workoutStreak = await this.calculateStreak(
       workoutPlan.id,
       workoutPlan.workoutDays,
-      toDate,
+      // toDate,
+      dayjs.utc(),
     );
 
     return {
